@@ -7,6 +7,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import static lol.maki.cts.cf.CfInstanceIdentityExtractor.SEPARATOR;
+
 public final class CfApp implements UserDetails {
 
 	private final String subject;
@@ -23,7 +25,7 @@ public final class CfApp implements UserDetails {
 
 	private CfApp(String subject) {
 		this.subject = subject;
-		String[] split = subject.split("/", 3);
+		String[] split = subject.split(SEPARATOR, 3);
 		this.orgGuid = split[0];
 		this.spaceGuid = split[1];
 		this.appGuid = split[2];
