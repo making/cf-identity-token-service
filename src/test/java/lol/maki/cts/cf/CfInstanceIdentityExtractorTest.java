@@ -1,21 +1,18 @@
 package lol.maki.cts.cf;
 
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-
 import lol.maki.cts.CertUtils;
-import org.junit.jupiter.api.Test;
-
-import org.springframework.core.io.ClassPathResource;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CfInstanceIdentityExtractorTest {
 
-	@Test
-	void extractPrincipal() {
+	@ParameterizedTest
+	@ValueSource(strings = {"instance-identity/instance.crt", "self-signed/server.crt"})
+	void extractPrincipal(String path) {
 		CfInstanceIdentityExtractor extractor = new CfInstanceIdentityExtractor();
-		Object principal = extractor.extractPrincipal(CertUtils.loadCertificate("instance.crt"));
+		Object principal = extractor.extractPrincipal(CertUtils.loadCertificate(path));
 		assertThat(principal).isEqualTo("4b84793c-f3ea-4a55-92b7-942726aac163:6755b19d-c543-4e0c-a4b3-cd6e7c9c68a3:02756191-d869-4806-9717-a6eec5142e8a");
 	}
 }
