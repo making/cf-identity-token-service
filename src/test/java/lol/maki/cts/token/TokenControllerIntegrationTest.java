@@ -1,11 +1,11 @@
 package lol.maki.cts.token;
 
 import java.io.IOException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
+import lol.maki.cts.CertUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +16,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -88,21 +87,10 @@ public class TokenControllerIntegrationTest {
 
 	@TestConfiguration
 	static class Config {
-		static X509Certificate loadCertificate() {
-			// TODO update cert
-			ClassPathResource resource = new ClassPathResource("instance.crt");
-			try (var stream = resource.getInputStream()) {
-				CertificateFactory cf = CertificateFactory.getInstance("X.509");
-				return (X509Certificate) cf.generateCertificate(stream);
-			}
-			catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
 
 		@Bean
 		public CertificatesInjectionFilter certificatesInjectionFilter() {
-			return new CertificatesInjectionFilter(new X509Certificate[] {loadCertificate()});
+			return new CertificatesInjectionFilter(new X509Certificate[] {CertUtils.loadCertificate("instance.crt")});
 		}
 
 
