@@ -90,7 +90,7 @@ public class TokenControllerIntegrationTest {
 
 		@Bean
 		public CertificatesInjectionFilter certificatesInjectionFilter() {
-			return new CertificatesInjectionFilter(new X509Certificate[] {CertUtils.loadCertificate("instance.crt")});
+			return new CertificatesInjectionFilter(new X509Certificate[] {CertUtils.loadCertificate("self-signed/server.crt")});
 		}
 
 
