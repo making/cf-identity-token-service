@@ -63,6 +63,8 @@ OIDC_PROVIDER_ARN=$(aws iam list-open-id-connect-providers --query 'OpenIDConnec
 
 ## Create a sample IAM Role
 
+As an example, let's give the cf app in the current space access to a dynamo table.
+
 ```bash
 # current org/space name
 ORG_NAME=$(cat ~/.cf/config.json | jq -r .OrganizationFields.Name)
@@ -128,12 +130,12 @@ cf ssh aws-cli
 
 ```bash
 export PATH=$PATH:/usr/local/bin
-CITS_DOMAIN=... # changeme
+CITS_DOMAIN=cits.<apps_domain> # changeme
 curl -s -XPOST https://${CITS_DOMAIN}/token --cert ${CF_INSTANCE_CERT} --key ${CF_INSTANCE_KEY} > /tmp/token
 
 export AWS_REGION=ap-northeast-1
 export AWS_WEB_IDENTITY_TOKEN_FILE=/tmp/token
-export AWS_ROLE_ARN=arn:aws:iam::****:role/cf-*** # paste the copied arn above
+export AWS_ROLE_ARN=arn:aws:iam::****:role/cf-*** # changeme (paste the copied arn above)
 export AWS_ROLE_SESSION_NAME=cf-demo
 
 aws sts get-caller-identity
