@@ -68,7 +68,10 @@ OIDC_PROVIDER_ARN=$(aws iam list-open-id-connect-providers --query 'OpenIDConnec
 
 ## Create a sample IAM Role
 
-As an example, let's give the cf app in the current space access to a dynamo table.
+As an example, let's give the cf app in the current space access to a dynamo table. The use case is shown in the following diagram:
+
+<img width="1024" alt="image" src="https://github.com/user-attachments/assets/24108282-4092-4ae5-8f3c-62fb7136d592">
+
 
 ```bash
 # current org/space name
