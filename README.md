@@ -1,5 +1,12 @@
 # CF Identity Token Service
+Exchange instance identity to web identity token (JWT)
 
+## How to deploy to Cloud Foundry
+
+```
+./mvnw clean package -DskipTests
+cf push
+```
 
 ## How to test mTLS locally
 
