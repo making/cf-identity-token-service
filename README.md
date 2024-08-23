@@ -39,7 +39,6 @@ https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc_
 ```bash
 # CITS_DOMAIN=cits.<apps_domain>
 CITS_DOMAIN=$(cf curl /v3/apps/$(cf app cits --guid)/routes | jq -r '.resources[0].url')
-openssl s_client -servername $CITS_DOMAIN -showcerts -connect $CITS_DOMAIN:443 </dev/null 2>/dev/null | openssl x509 -outform PEM
 FINGERPRINT=$(openssl s_client -servername $CITS_DOMAIN -showcerts -connect $CITS_DOMAIN:443 </dev/null 2>/dev/null | openssl x509 -fingerprint -sha1 -noout | sed 's/sha1 Fingerprint=//' | sed 's/://g')
 ```
 
