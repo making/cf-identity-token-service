@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import static lol.maki.cits.cf.CfInstanceIdentityExtractor.SEPARATOR;
 
-public final class CfApp implements UserDetails {
+public final class CfAppIdentity implements UserDetails {
 
 	private final String subject;
 
@@ -19,11 +19,11 @@ public final class CfApp implements UserDetails {
 
 	private final String appGuid;
 
-	public static CfApp of(String subject) {
-		return new CfApp(subject);
+	public static CfAppIdentity of(String subject) {
+		return new CfAppIdentity(subject);
 	}
 
-	private CfApp(String subject) {
+	private CfAppIdentity(String subject) {
 		this.subject = subject;
 		String[] split = subject.split(SEPARATOR, 3);
 		this.orgGuid = split[0];
@@ -64,7 +64,7 @@ public final class CfApp implements UserDetails {
 			return true;
 		if (obj == null || obj.getClass() != this.getClass())
 			return false;
-		var that = (CfApp) obj;
+		var that = (CfAppIdentity) obj;
 		return Objects.equals(this.subject, that.subject);
 	}
 

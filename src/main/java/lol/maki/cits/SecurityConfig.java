@@ -2,7 +2,7 @@ package lol.maki.cits;
 
 import java.time.Clock;
 
-import lol.maki.cits.cf.CfApp;
+import lol.maki.cits.cf.CfAppIdentity;
 import lol.maki.cits.cf.CfInstanceIdentityExtractor;
 
 import org.springframework.context.annotation.Bean;
@@ -26,7 +26,7 @@ public class SecurityConfig {
 
 	@Bean
 	public UserDetailsService userDetailsService() {
-		return CfApp::of;
+		return CfAppIdentity::of;
 	}
 
 	@Bean
