@@ -1,6 +1,8 @@
 # CF Identity Token Service
 Exchange instance identity to web identity token (JWT)
 
+By using this service, when an app on Cloud Foundry accesses a cloud service such as AWS, it can authenticate using a JWT that identifies the app itself, without having to pass an access key/secret key.
+
 ## How to deploy to Cloud Foundry
 
 ```bash
