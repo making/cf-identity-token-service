@@ -13,6 +13,8 @@ By using this service, when an app on Cloud Foundry accesses a cloud service suc
 cf push
 ```
 
+Let's go inside the container and issue a token.
+
 ```bash
 cf ssh cits
 ```
@@ -25,6 +27,8 @@ CITS_DOMAIN=$(echo $VCAP_APPLICATION  | jq -r .application_uris[0])
 curl -XPOST https://${CITS_DOMAIN}/token --cert ${CF_INSTANCE_CERT} --key ${CF_INSTANCE_KEY}
 # eyJra...
 ```
+
+Note that the token service is accessed via the Go Router, not via localhost. The router performs TLS verification and sets the validated certificate in `X-Forwarded-Client-Cert` header.
 
 ## How to register CF Identity Token Service to AWS IAM as an OIDC Provider
 
