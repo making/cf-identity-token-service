@@ -80,10 +80,8 @@ public class TokenControllerIntegrationTest {
 			kmf.init(keyStore, keyStorePassword.toCharArray());
 			TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 			tmf.init(trustStore);
-
 			SSLContext sslContext = SSLContext.getInstance("TLS");
 			sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-
 			return HttpClient.newBuilder().sslContext(sslContext).build();
 		}
 		catch (Exception e) {
