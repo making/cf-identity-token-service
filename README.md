@@ -11,6 +11,165 @@ Exchange instance identity to web identity token (JWT)
 cf push
 ```
 
+```bash
+cf ssh cits
+```
+
+In the container
+
+```bash
+CITS_DOMAIN=$(echo $VCAP_APPLICATION  | jq -r .application_uris[0])
+
+curl -XPOST https://${CITS_DOMAIN}/token --cert ${CF_INSTANCE_CERT} --key ${CF_INSTANCE_KEY}
+# eyJra...
+```
+
+## How to register CF Identity Token Service to AWS IAM as an OIDC Provider
+
+Obtain certificate thumbprint
+
+```bash
+# https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc_verify-thumbprint.html#oidc-obtain-thumbprint
+# CITS_DOMAIN=cits.<apps_domain>
+CITS_DOMAIN=$(cf curl /v3/apps/$(cf app cits --guid)/routes | jq -r '.resources[0].url')
+openssl s_client -servername $CITS_DOMAIN -showcerts -connect $CITS_DOMAIN:443 </dev/null 2>/dev/null | openssl x509 -outform PEM
+FINGERPRINT=$(openssl s_client -servername $CITS_DOMAIN -showcerts -connect $CITS_DOMAIN:443 </dev/null 2>/dev/null | openssl x509 -fingerprint -sha1 -noout | sed 's/sha1 Fingerprint=//' | sed 's/://g')
+```
+
+https://docs.aws.amazon.com/IAM/latest/UserGuide/iam_example_iam_CreateOpenIdConnectProvider_section.html
+
+```bash
+cat <<EOF > oidc-provider.json
+{
+    "Url": "https://$CITS_DOMAIN",
+    "ClientIDList": [
+        "sts.amazonaws.com"
+    ],
+    "ThumbprintList": [
+        "$FINGERPRINT"
+    ]
+}
+EOF
+```
+
+Create an OIDC Provider
+
+```bash
+aws iam create-open-id-connect-provider --cli-input-json file://oidc-provider.json
+```
+
+```bash
+OIDC_PROVIDER_ARN=$(aws iam list-open-id-connect-providers --query 'OpenIDConnectProviderList[?ends_with(Arn, `cits.apps.sandbox.aws.maki.lol`)].Arn' --output text)
+```
+
+## Create a sample IAM Role
+
+```bash
+# current org/space name
+ORG_NAME=$(cat ~/.cf/config.json | jq -r .OrganizationFields.Name)
+SPACE_NAME=$(cat ~/.cf/config.json | jq -r .SpaceFields.Name)
+
+ORG_GUID=$(cf org $ORG_NAME --guid)
+SPACE_GUID=$(cf space $SPACE_NAME --guid)
+```
+
+```bash
+cat << EOF > cf-${ORG_NAME}-${SPACE_NAME}-trust-policy.json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Federated": "${OIDC_PROVIDER_ARN}"
+            },
+            "Action": "sts:AssumeRoleWithWebIdentity",
+            "Condition": {
+                "StringLike": {
+                    "${CITS_DOMAIN}:sub": "${ORG_GUID}:${SPACE_GUID}:*",
+                    "${CITS_DOMAIN}:aud": "sts.amazonaws.com"
+                }
+            }
+        }
+    ]
+}
+EOF
+
+aws iam create-role --role-name cf-${ORG_NAME}-${SPACE_NAME} --assume-role-policy-document file://cf-${ORG_NAME}-${SPACE_NAME}-trust-policy.json
+```
+
+```bash
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+export AWS_REGION=ap-northeast-1
+
+cat <<EOF > cf-${ORG_NAME}-${SPACE_NAME}-policy-dynamo.json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PrefixFullAccess",
+            "Effect": "Allow",
+            "Action": "dynamodb:*",
+            "Resource": "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT_ID}:table/${ORG_NAME}-${SPACE_NAME}-*"
+        }
+    ]
+}
+EOF
+
+aws iam put-role-policy --role-name cf-${ORG_NAME}-${SPACE_NAME} --policy-name dynamo-prefix-full-access-${ORG_NAME}-${SPACE_NAME} --policy-document file://cf-${ORG_NAME}-${SPACE_NAME}-policy-dynamo.json
+```
+
+Login to a cf container with aws CLI to try to assume role
+
+```bash
+# copy the result of `aws iam get-role --role-name cf-${ORG_NAME}-${SPACE_NAME} --query 'Role.Arn' --output text`
+cf push aws-cli -m 128m -o public.ecr.aws/aws-cli/aws-cli --no-route -u process --no-manifest -c 'sleep infinity'
+cf ssh aws-cli
+```
+
+```bash
+export PATH=$PATH:/usr/local/bin
+CITS_DOMAIN=... # changeme
+curl -s -XPOST https://${CITS_DOMAIN}/token --cert ${CF_INSTANCE_CERT} --key ${CF_INSTANCE_KEY} > /tmp/token
+
+export AWS_REGION=ap-northeast-1
+export AWS_WEB_IDENTITY_TOKEN_FILE=/tmp/token
+export AWS_ROLE_ARN=arn:aws:iam::****:role/cf-*** # paste the copied arn above
+export AWS_ROLE_SESSION_NAME=cf-demo
+
+aws sts get-caller-identity
+```
+
+Create a dynamo table with the prefix `<org_name>-<space_name>-`
+
+```bash
+TABLENAME=<org_name>-<space_name>-movie # changeme
+aws dynamodb create-table \
+    --table-name ${TABLENAME} \
+    --attribute-definitions \
+        AttributeName=movieId,AttributeType=S \
+        AttributeName=title,AttributeType=S \
+        AttributeName=genre,AttributeType=S \
+    --key-schema \
+        AttributeName=movieId,KeyType=HASH \
+    --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+    --global-secondary-indexes \
+        '[
+            {
+                "IndexName": "title-index",
+                "KeySchema": [{"AttributeName":"title","KeyType":"HASH"}],
+                "Projection": {"ProjectionType":"ALL"},
+                "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
+            },
+            {
+                "IndexName": "genre-index",
+                "KeySchema": [{"AttributeName":"genre","KeyType":"HASH"}],
+                "Projection": {"ProjectionType":"ALL"},
+                "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
+            }
+        ]'
+```
+
 ## How to test mTLS locally
 
 ```bash
