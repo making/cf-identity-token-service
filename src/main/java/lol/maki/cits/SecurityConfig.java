@@ -2,8 +2,8 @@ package lol.maki.cits;
 
 import java.time.Clock;
 
-import lol.maki.cits.cf.CfAppIdentity;
-import lol.maki.cits.cf.CfInstanceIdentityExtractor;
+import lol.maki.cits.cf.CfIdentity;
+import lol.maki.cits.cf.CfIdentityExtractor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,14 +19,14 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		return http
 			.authorizeHttpRequests(authz -> authz.requestMatchers("/token").hasRole("APP").anyRequest().permitAll())
-			.x509(s -> s.x509PrincipalExtractor(new CfInstanceIdentityExtractor()))
+			.x509(s -> s.x509PrincipalExtractor(new CfIdentityExtractor()))
 			.csrf(AbstractHttpConfigurer::disable)
 			.build();
 	}
 
 	@Bean
 	public UserDetailsService userDetailsService() {
-		return CfAppIdentity::of;
+		return CfIdentity::of;
 	}
 
 	@Bean

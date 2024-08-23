@@ -10,7 +10,7 @@ import java.util.Map;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
-import lol.maki.cits.cf.CfAppIdentity;
+import lol.maki.cits.cf.CfIdentity;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,18 +34,18 @@ public class TokenController {
 	}
 
 	@PostMapping(path = "/token")
-	public String token(@AuthenticationPrincipal CfAppIdentity cfAppIdentity, UriComponentsBuilder builder) {
+	public String token(@AuthenticationPrincipal CfIdentity cfIdentity, UriComponentsBuilder builder) {
 		String issuer = builder.replacePath("").build().toString();
 		Instant issuedAt = Instant.now(this.clock);
 		Instant expiresAt = issuedAt.plus(12, ChronoUnit.HOURS);
 		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().issuer(issuer)
 			.expirationTime(Date.from(expiresAt))
-			.subject(cfAppIdentity.getUsername())
+			.subject(cfIdentity.getUsername())
 			.issueTime(Date.from(issuedAt))
 			.audience(this.jwtProps.audience())
-			.claim("org_guid", cfAppIdentity.orgGuid())
-			.claim("space_guid", cfAppIdentity.spaceGuid())
-			.claim("app_guid", cfAppIdentity.appGuid())
+			.claim("org_guid", cfIdentity.orgGuid())
+			.claim("space_guid", cfIdentity.spaceGuid())
+			.claim("app_guid", cfIdentity.appGuid())
 			.build();
 		return this.jwtService.sign(claimsSet).serialize();
 	}

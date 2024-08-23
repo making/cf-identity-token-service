@@ -7,9 +7,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import static lol.maki.cits.cf.CfInstanceIdentityExtractor.SEPARATOR;
+import static lol.maki.cits.cf.CfIdentityExtractor.SEPARATOR;
 
-public final class CfAppIdentity implements UserDetails {
+public final class CfIdentity implements UserDetails {
 
 	private final String subject;
 
@@ -19,11 +19,11 @@ public final class CfAppIdentity implements UserDetails {
 
 	private final String appGuid;
 
-	public static CfAppIdentity of(String subject) {
-		return new CfAppIdentity(subject);
+	public static CfIdentity of(String subject) {
+		return new CfIdentity(subject);
 	}
 
-	private CfAppIdentity(String subject) {
+	private CfIdentity(String subject) {
 		this.subject = subject;
 		String[] split = subject.split(SEPARATOR, 3);
 		this.orgGuid = split[0];
@@ -64,7 +64,7 @@ public final class CfAppIdentity implements UserDetails {
 			return true;
 		if (obj == null || obj.getClass() != this.getClass())
 			return false;
-		var that = (CfAppIdentity) obj;
+		var that = (CfIdentity) obj;
 		return Objects.equals(this.subject, that.subject);
 	}
 

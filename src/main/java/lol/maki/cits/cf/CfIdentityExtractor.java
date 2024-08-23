@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.security.web.authentication.preauth.x509.X509PrincipalExtractor;
 
-public class CfInstanceIdentityExtractor implements X509PrincipalExtractor {
+public class CfIdentityExtractor implements X509PrincipalExtractor {
 
 	static String SEPARATOR = ":";
 
