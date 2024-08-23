@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CfInstanceIdentityExtractorTest {
 
 	@ParameterizedTest
-	@ValueSource(strings = {"instance-identity/instance.crt", "self-signed/server.crt"})
+	@ValueSource(strings = {"instance-identity/instance.crt", "self-signed/client.crt"})
 	void extractPrincipal(String path) {
 		CfInstanceIdentityExtractor extractor = new CfInstanceIdentityExtractor();
 		Object principal = extractor.extractPrincipal(CertUtils.loadCertificate(path));
