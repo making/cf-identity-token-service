@@ -1,4 +1,4 @@
-package lol.maki.cts;
+package lol.maki.cits;
 
 import java.nio.file.Files;
 import java.security.KeyFactory;

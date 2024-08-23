@@ -1,4 +1,4 @@
-package lol.maki.cts.cf;
+package lol.maki.cits.cf;
 
 import java.security.cert.X509Certificate;
 import java.util.regex.Matcher;

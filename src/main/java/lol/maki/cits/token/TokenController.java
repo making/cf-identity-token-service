@@ -1,4 +1,4 @@
-package lol.maki.cts.token;
+package lol.maki.cits.token;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -10,7 +10,7 @@ import java.util.Map;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
-import lol.maki.cts.cf.CfApp;
+import lol.maki.cits.cf.CfApp;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;

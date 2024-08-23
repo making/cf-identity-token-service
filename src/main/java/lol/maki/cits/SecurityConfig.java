@@ -1,9 +1,9 @@
-package lol.maki.cts;
+package lol.maki.cits;
 
 import java.time.Clock;
 
-import lol.maki.cts.cf.CfApp;
-import lol.maki.cts.cf.CfInstanceIdentityExtractor;
+import lol.maki.cits.cf.CfApp;
+import lol.maki.cits.cf.CfInstanceIdentityExtractor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

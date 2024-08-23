@@ -1,4 +1,4 @@
-package lol.maki.cts.cf;
+package lol.maki.cits.cf;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -7,7 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import static lol.maki.cts.cf.CfInstanceIdentityExtractor.SEPARATOR;
+import static lol.maki.cits.cf.CfInstanceIdentityExtractor.SEPARATOR;
 
 public final class CfApp implements UserDetails {
 

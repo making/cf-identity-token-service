@@ -8,11 +8,11 @@
 		<version>3.3.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>lol.maki.cts</groupId>
-	<artifactId>cf-token-service</artifactId>
+	<groupId>lol.maki.cits</groupId>
+	<artifactId>cf-identity-token-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>cf-token-service</name>
-	<description>cf-token-service</description>
+	<name>cf-identity-token-service</name>
+	<description>cf-identity-token-service</description>
 	<url/>
 	<licenses>
 		<license/>

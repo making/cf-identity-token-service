@@ -1,4 +1,4 @@
-package lol.maki.cts;
+package lol.maki.cits;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,10 +6,10 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
-public class CfTokenServiceApplication {
+public class CfIdentityTokenServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(CfTokenServiceApplication.class, args);
+		SpringApplication.run(CfIdentityTokenServiceApplication.class, args);
 	}
 
 }

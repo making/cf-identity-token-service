@@ -1,4 +1,4 @@
-package lol.maki.cts.token;
+package lol.maki.cits.token;
 
 import java.io.IOException;
 import java.net.http.HttpClient;
@@ -10,7 +10,7 @@ import javax.net.ssl.TrustManagerFactory;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
-import lol.maki.cts.CertUtils;
+import lol.maki.cits.CertUtils;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;

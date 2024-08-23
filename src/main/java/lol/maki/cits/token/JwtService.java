@@ -1,4 +1,4 @@
-package lol.maki.cts.token;
+package lol.maki.cits.token;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;

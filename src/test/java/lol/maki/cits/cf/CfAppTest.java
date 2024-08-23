@@ -1,4 +1,4 @@
-package lol.maki.cts.cf;
+package lol.maki.cits.cf;
 
 import org.junit.jupiter.api.Test;
 

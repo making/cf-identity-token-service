@@ -1,6 +1,6 @@
-package lol.maki.cts.cf;
+package lol.maki.cits.cf;
 
-import lol.maki.cts.CertUtils;
+import lol.maki.cits.CertUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 

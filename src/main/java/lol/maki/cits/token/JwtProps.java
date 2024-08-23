@@ -1,4 +1,4 @@
-package lol.maki.cts.token;
+package lol.maki.cits.token;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
