@@ -169,6 +169,53 @@ aws dynamodb create-table \
                 "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
             }
         ]'
+
+# wait until the table is created
+
+aws dynamodb put-item \
+    --table-name ${TABLENAME} \
+    --item \
+        '{
+            "movieId": {"S": "1e7b56f3-0c65-4fa6-9a32-6d0a65fbb3a5"},
+            "title": {"S": "Inception"},
+            "releaseYear": {"N": "2010"},
+            "genre": {"S": "Science Fiction"},
+            "rating": {"N": "8.8"},
+            "director": {"S": "Christopher Nolan"}
+        }'
+
+aws dynamodb put-item \
+    --table-name ${TABLENAME} \
+    --item \
+        '{
+            "movieId": {"S": "2a4b6d72-789b-4a1a-9c7f-74e5a8f7676d"},
+            "title": {"S": "The Matrix"},
+            "releaseYear": {"N": "1999"},
+            "genre": {"S": "Action"},
+            "rating": {"N": "8.7"},
+            "director": {"S": "The Wachowskis"}
+        }'
+
+aws dynamodb put-item \
+    --table-name ${TABLENAME} \
+    --item \
+        '{
+            "movieId": {"S": "3f6c8f74-2e6a-48e9-a07f-034f8a67b9e6"},
+            "title": {"S": "Interstellar"},
+            "releaseYear": {"N": "2014"},
+            "genre": {"S": "Adventure"},
+            "rating": {"N": "8.6"},
+            "director": {"S": "Christopher Nolan"}
+        }'
+
+aws dynamodb scan --table-name ${TABLENAME}
+```
+
+You do not have access to table without prefix
+
+```
+bash-4.2# aws dynamodb scan --table-name movie
+An error occurred (AccessDeniedException) when calling the Scan operation: User: arn:aws:sts::****:assumed-role/cf-****-****/cf-demo is not authorized to perform: dynamodb:Scan on resource: arn:aws:dynamodb:ap-northeast-1:****:table/movie because no identity-based policy allows the dynamodb:Scan action
 ```
 
 ## How to test mTLS locally
