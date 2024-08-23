@@ -3,7 +3,7 @@ Exchange instance identity to web identity token (JWT)
 
 ## How to deploy to Cloud Foundry
 
-```
+```bash
 # Generate RSA key for JWT signing
 ./gen_rsa_keys.sh
 
