@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JwtService {
+
 	private final JwtProps jwtProps;
 
 	private JWSSigner signer;
@@ -23,12 +24,15 @@ public class JwtService {
 	private JWSVerifier verifier;
 
 	public JwtService(JwtProps jwtProps) {
-		this.jwtProps = jwtProps; this.signer = new RSASSASigner(jwtProps.privateKey());
+		this.jwtProps = jwtProps;
+		this.signer = new RSASSASigner(jwtProps.privateKey());
 		this.verifier = new RSASSAVerifier(jwtProps.publicKey());
 	}
 
 	public SignedJWT sign(JWTClaimsSet claimsSet) {
-		JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(this.jwtProps.keyId()).type(JOSEObjectType.JWT).build();
+		JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(this.jwtProps.keyId())
+			.type(JOSEObjectType.JWT)
+			.build();
 		SignedJWT signedJWT = new SignedJWT(header, claimsSet);
 		try {
 			signedJWT.sign(this.signer);

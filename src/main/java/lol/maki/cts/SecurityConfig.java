@@ -14,15 +14,14 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
+
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		return http
-				.authorizeHttpRequests(authz -> authz
-						.requestMatchers("/token").hasRole("APP")
-						.anyRequest().permitAll())
-				.x509(s -> s.x509PrincipalExtractor(new CfInstanceIdentityExtractor()))
-				.csrf(AbstractHttpConfigurer::disable)
-				.build();
+			.authorizeHttpRequests(authz -> authz.requestMatchers("/token").hasRole("APP").anyRequest().permitAll())
+			.x509(s -> s.x509PrincipalExtractor(new CfInstanceIdentityExtractor()))
+			.csrf(AbstractHttpConfigurer::disable)
+			.build();
 	}
 
 	@Bean
@@ -34,5 +33,5 @@ public class SecurityConfig {
 	public Clock clock() {
 		return Clock.systemUTC();
 	}
-}
 
+}

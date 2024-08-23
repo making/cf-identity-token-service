@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.springframework.core.io.ClassPathResource;
 
 public class CertUtils {
+
 	public static X509Certificate loadCertificate(String path) {
 		ClassPathResource resource = new ClassPathResource(path);
 		try (var stream = resource.getInputStream()) {
@@ -27,8 +28,7 @@ public class CertUtils {
 	public static PrivateKey loadPrivateKey(String path) {
 		ClassPathResource resource = new ClassPathResource(path);
 		try (var lines = Files.lines(resource.getFile().toPath())) {
-			String key = lines.filter(line -> !line.startsWith("-----"))
-					.collect(Collectors.joining());
+			String key = lines.filter(line -> !line.startsWith("-----")).collect(Collectors.joining());
 			byte[] keyBytes = Base64.getDecoder().decode(key);
 			PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
 			KeyFactory kf = KeyFactory.getInstance("RSA");
@@ -58,7 +58,8 @@ public class CertUtils {
 		try {
 			KeyStore keyStore = KeyStore.getInstance("PKCS12");
 			keyStore.load(null, null);
-			KeyStore.PrivateKeyEntry privateKeyEntry = new KeyStore.PrivateKeyEntry(privateKey, new java.security.cert.Certificate[] {certificate});
+			KeyStore.PrivateKeyEntry privateKeyEntry = new KeyStore.PrivateKeyEntry(privateKey,
+					new java.security.cert.Certificate[] { certificate });
 			KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(password.toCharArray());
 			keyStore.setEntry("key", privateKeyEntry, passwordProtection);
 			return keyStore;
@@ -79,4 +80,5 @@ public class CertUtils {
 			throw new RuntimeException(e);
 		}
 	}
+
 }

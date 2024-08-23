@@ -60,8 +60,10 @@ public final class CfApp implements UserDetails {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == this) return true;
-		if (obj == null || obj.getClass() != this.getClass()) return false;
+		if (obj == this)
+			return true;
+		if (obj == null || obj.getClass() != this.getClass())
+			return false;
 		var that = (CfApp) obj;
 		return Objects.equals(this.subject, that.subject);
 	}
@@ -75,4 +77,5 @@ public final class CfApp implements UserDetails {
 	public String toString() {
 		return "CfApp{orgGuid='%s', spaceGuid='%s', appGuid='%s'}".formatted(orgGuid, spaceGuid, appGuid);
 	}
+
 }
