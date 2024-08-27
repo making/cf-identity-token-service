@@ -1,6 +1,6 @@
 package lol.maki.cits;
 
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -8,9 +8,9 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
-import java.util.stream.Collectors;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StreamUtils;
 
 public class CertUtils {
 
@@ -27,8 +27,11 @@ public class CertUtils {
 
 	public static PrivateKey loadPrivateKey(String path) {
 		ClassPathResource resource = new ClassPathResource(path);
-		try (var lines = Files.lines(resource.getFile().toPath())) {
-			String key = lines.filter(line -> !line.startsWith("-----")).collect(Collectors.joining());
+		try (var stream = resource.getInputStream()) {
+			String key = StreamUtils.copyToString(stream, StandardCharsets.UTF_8)
+				.replace("-----BEGIN PRIVATE KEY-----", "")
+				.replace("-----END PRIVATE KEY-----", "")
+				.replace("\n", "");
 			byte[] keyBytes = Base64.getDecoder().decode(key);
 			PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
 			KeyFactory kf = KeyFactory.getInstance("RSA");
