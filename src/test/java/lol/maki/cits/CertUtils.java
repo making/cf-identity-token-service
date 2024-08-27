@@ -9,13 +9,17 @@ import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StreamUtils;
 
 public class CertUtils {
 
-	public static X509Certificate loadCertificate(String path) {
-		ClassPathResource resource = new ClassPathResource(path);
+	private static final ResourceLoader resourceLoader = new DefaultResourceLoader();
+
+	public static X509Certificate loadCertificate(String location) {
+		Resource resource = resourceLoader.getResource(location);
 		try (var stream = resource.getInputStream()) {
 			CertificateFactory cf = CertificateFactory.getInstance("X.509");
 			return (X509Certificate) cf.generateCertificate(stream);
@@ -25,8 +29,8 @@ public class CertUtils {
 		}
 	}
 
-	public static PrivateKey loadPrivateKey(String path) {
-		ClassPathResource resource = new ClassPathResource(path);
+	public static PrivateKey loadPrivateKey(String location) {
+		Resource resource = resourceLoader.getResource(location);
 		try (var stream = resource.getInputStream()) {
 			String key = StreamUtils.copyToString(stream, StandardCharsets.UTF_8)
 				.replace("-----BEGIN PRIVATE KEY-----", "")
@@ -72,11 +76,11 @@ public class CertUtils {
 		}
 	}
 
-	public static KeyStore createTrustStore(String path) {
+	public static KeyStore createTrustStore(String location) {
 		try {
 			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 			trustStore.load(null, null);
-			trustStore.setCertificateEntry("ca-cert", loadCertificate(path));
+			trustStore.setCertificateEntry("ca-cert", loadCertificate(location));
 			return trustStore;
 		}
 		catch (Exception e) {

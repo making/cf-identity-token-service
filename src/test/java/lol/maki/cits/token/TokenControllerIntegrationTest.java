@@ -43,8 +43,9 @@ public class TokenControllerIntegrationTest {
 
 	@Test
 	void testWithValidCertificate() throws Exception {
-		KeyStore keyStore = CertUtils.createKeyStore("self-signed/client.key", "self-signed/client.crt", "password");
-		KeyStore trustStore = CertUtils.createTrustStore("self-signed/ca.crt");
+		KeyStore keyStore = CertUtils.createKeyStore("classpath:self-signed/client.key",
+				"classpath:self-signed/client.crt", "password");
+		KeyStore trustStore = CertUtils.createTrustStore("classpath:self-signed/ca.crt");
 		HttpClient httpClient = createHttpClient(keyStore, "password", trustStore);
 		RestClient restClient = this.restClientBuilder.requestFactory(new JdkClientHttpRequestFactory(httpClient))
 			.baseUrl("https://localhost:" + port)
@@ -65,7 +66,7 @@ public class TokenControllerIntegrationTest {
 	@Test
 	void testWithMissingCertificate() {
 		KeyStore keyStore = CertUtils.createEmptyKeyStore();
-		KeyStore trustStore = CertUtils.createTrustStore("self-signed/ca.crt");
+		KeyStore trustStore = CertUtils.createTrustStore("classpath:self-signed/ca.crt");
 		HttpClient httpClient = createHttpClient(keyStore, "password", trustStore);
 		RestClient restClient = this.restClientBuilder.requestFactory(new JdkClientHttpRequestFactory(httpClient))
 			.baseUrl("https://localhost:" + port)
