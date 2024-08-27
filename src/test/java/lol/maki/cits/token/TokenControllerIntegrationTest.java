@@ -1,19 +1,13 @@
 package lol.maki.cits.token;
 
 import java.io.IOException;
-import java.net.http.HttpClient;
-import java.security.KeyStore;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
-import lol.maki.cits.CertUtils;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -23,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestClient;
 
@@ -32,29 +25,32 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
 		"logging.level.org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider=info",
 		"logging.level.web=debug", "jwt.audience=test", "jwt.public-key=classpath:rsa/public_key",
-		"jwt.private-key=classpath:rsa/private_key", "spring.profiles.active=mtls", })
+		"jwt.private-key=classpath:rsa/private_key", "spring.profiles.active=mtls",
+		"spring.ssl.bundle.pem.client.keystore.certificate=classpath:self-signed/client.crt",
+		"spring.ssl.bundle.pem.client.keystore.private-key=classpath:self-signed/client.key",
+		"spring.ssl.bundle.pem.client.truststore.certificate=classpath:self-signed/ca.crt",
+		"spring.ssl.bundle.pem.cacert.truststore.certificate=classpath:self-signed/ca.crt" })
 public class TokenControllerIntegrationTest {
 
 	@Autowired
 	RestClient.Builder restClientBuilder;
+
+	@Autowired
+	RestClientSsl clientSsl;
 
 	@LocalServerPort
 	int port;
 
 	@Test
 	void testWithValidCertificate() throws Exception {
-		KeyStore keyStore = CertUtils.createKeyStore("classpath:self-signed/client.key",
-				"classpath:self-signed/client.crt", "password");
-		KeyStore trustStore = CertUtils.createTrustStore("classpath:self-signed/ca.crt");
-		HttpClient httpClient = createHttpClient(keyStore, "password", trustStore);
-		RestClient restClient = this.restClientBuilder.requestFactory(new JdkClientHttpRequestFactory(httpClient))
-			.baseUrl("https://localhost:" + port)
+		RestClient restClient = this.restClientBuilder.apply(this.clientSsl.fromBundle("client"))
+			.baseUrl("https://localhost:" + this.port)
 			.build();
 		ResponseEntity<String> response = restClient.post().uri("/token").retrieve().toEntity(String.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).isNotEmpty();
 		JWTClaimsSet jwtClaimsSet = JWTParser.parse(response.getBody()).getJWTClaimsSet();
-		assertThat(jwtClaimsSet.getIssuer()).isEqualTo("https://localhost:" + port);
+		assertThat(jwtClaimsSet.getIssuer()).isEqualTo("https://localhost:" + this.port);
 		assertThat(jwtClaimsSet.getAudience()).containsExactly("test");
 		assertThat(jwtClaimsSet.getSubject()).isEqualTo(
 				"4b84793c-f3ea-4a55-92b7-942726aac163:6755b19d-c543-4e0c-a4b3-cd6e7c9c68a3:02756191-d869-4806-9717-a6eec5142e8a");
@@ -65,29 +61,11 @@ public class TokenControllerIntegrationTest {
 
 	@Test
 	void testWithMissingCertificate() {
-		KeyStore keyStore = CertUtils.createEmptyKeyStore();
-		KeyStore trustStore = CertUtils.createTrustStore("classpath:self-signed/ca.crt");
-		HttpClient httpClient = createHttpClient(keyStore, "password", trustStore);
-		RestClient restClient = this.restClientBuilder.requestFactory(new JdkClientHttpRequestFactory(httpClient))
-			.baseUrl("https://localhost:" + port)
+		RestClient restClient = this.restClientBuilder.apply(this.clientSsl.fromBundle("cacert"))
+			.baseUrl("https://localhost:" + this.port)
 			.build();
 		ResponseEntity<String> response = restClient.post().uri("/token").retrieve().toEntity(String.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-	}
-
-	static HttpClient createHttpClient(KeyStore keyStore, String keyStorePassword, KeyStore trustStore) {
-		try {
-			KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-			kmf.init(keyStore, keyStorePassword.toCharArray());
-			TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-			tmf.init(trustStore);
-			SSLContext sslContext = SSLContext.getInstance("TLS");
-			sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-			return HttpClient.newBuilder().sslContext(sslContext).build();
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	@TestConfiguration(proxyBeanMethods = false)
