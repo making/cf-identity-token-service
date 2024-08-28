@@ -1,0 +1,103 @@
+name: CI
+on:
+  push:
+    branches:
+    - main
+    paths:
+    - src/**
+    - ui/**
+    - pom.xml
+    - .github/workflows/*
+  pull_request:
+    branches:
+    - main
+    paths:
+    - src/**
+    - ui/**
+    - pom.xml
+    - .github/workflows/*
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK
+      uses: graalvm/setup-graalvm@v1
+      with:
+        java-version: '21'
+        distribution: 'graalvm'
+        cache: maven
+    - name: Build with Maven
+      run: |
+        ./gen_self_signed_certs.sh
+        ./gen_rsa_keys.sh
+        mvn -B package --file pom.xml -V --no-transfer-progress
+  build-jvm-image:
+    needs: test
+    permissions:
+      contents: read
+      packages: write
+    uses: making/workflows/.github/workflows/build-docker-image-maven-jvm.yaml@main
+    with:
+      image_file: image.yaml
+      download_target: false
+  build-native-binaries:
+    needs: test
+    permissions:
+      contents: write
+    uses: making/workflows/.github/workflows/build-native-image.yaml@main
+    strategy:
+      matrix:
+        with:
+        - runs-on: ubuntu-latest
+          binary_suffix: -x86_64-pc-linux
+        - runs-on: macos-14
+          binary_suffix: -aarch64-apple-darwin
+        - runs-on: macos-13
+          binary_suffix: -x86_64-apple-darwin
+    with:
+      download_target: false
+      runs-on: ${{ matrix.with.runs-on }}
+      binary_suffix: ${{ matrix.with.binary_suffix }}
+  build-native-docker-image:
+    needs: build-native-binaries
+    permissions:
+      contents: read
+      packages: write
+    uses: making/workflows/.github/workflows/build-docker-image-maven-native.yaml@main
+    with:
+      image_file: image_native.yaml
+      use_pre_built_artifact: true
+      pre_built_artifact_name: cf-identity-token-service-x86_64-pc-linux
+      pre_built_artifact_path: cf-identity-token-service-x86_64-pc-linux
+  publish-native-binaries:
+    needs: build-native-binaries
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download build artifacts x86_64-pc-linux
+      uses: actions/download-artifact@v2
+      with:
+        name: cf-identity-token-service-x86_64-pc-linux
+        path: cf-identity-token-service-x86_64-pc-linux
+    - name: Download build artifacts x86_64-apple-darwin
+      uses: actions/download-artifact@v2
+      with:
+        name: cf-identity-token-service-x86_64-apple-darwin
+        path: cf-identity-token-service-x86_64-apple-darwin
+    - name: Download build artifacts aarch64-apple-darwin
+      uses: actions/download-artifact@v2
+      with:
+        name: cf-identity-token-service-aarch64-apple-darwin
+        path: cf-identity-token-service-aarch64-apple-darwin
+    - name: check files
+      run: find .
+    - uses: pyTooling/Actions/releaser@r0
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        files: |
+          ./cf-identity-token-service-x86_64-pc-linux/cf-identity-token-service-x86_64-pc-linux
+          ./cf-identity-token-service-x86_64-apple-darwin/cf-identity-token-service-x86_64-apple-darwin
+          ./cf-identity-token-service-aarch64-apple-darwin/cf-identity-token-service-aarch64-apple-darwin
