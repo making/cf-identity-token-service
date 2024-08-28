@@ -36,7 +36,7 @@ Note that the token service is accessed via the Go Router, not via localhost. Th
 # Generate RSA key for JWT signing
 ./gen_rsa_keys.sh
 
-cf push cits -o ghcr.io/making/cf-identity-token-service:native --no-start
+cf push cits -o ghcr.io/making/cf-identity-token-service:jvm --no-start
 cf set-env cits JWT_PRIVATEKEY base64:$(cat src/main/resources/private_key.pem | base64 -w0)
 cf set-env cits JWT_PUBLICKEY base64:$(cat src/main/resources/public.pem | base64 -w0)
 cf start cits
