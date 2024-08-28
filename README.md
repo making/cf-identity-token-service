@@ -76,7 +76,7 @@ aws iam create-open-id-connect-provider --cli-input-json file://oidc-provider.js
 ```
 
 ```bash
-OIDC_PROVIDER_ARN=$(aws iam list-open-id-connect-providers --query 'OpenIDConnectProviderList[?ends_with(Arn, `cits.apps.sandbox.aws.maki.lol`)].Arn' --output text)
+OIDC_PROVIDER_ARN=$(aws iam list-open-id-connect-providers --query "OpenIDConnectProviderList[?ends_with(Arn, '$CITS_DOMAIN')].Arn" --output text)
 ```
 
 ## Create a sample IAM Role
