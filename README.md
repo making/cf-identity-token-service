@@ -3,7 +3,7 @@ Exchange [instance identity](https://docs.cloudfoundry.org/devguide/deploy-apps/
 
 By using this service, when an app on Cloud Foundry accesses a cloud service such as AWS, it can authenticate using a JWT that identifies the app itself, without having to pass an access key/secret key.
 
-## How to deploy to Cloud Foundry
+## How to deploy to Cloud Foundry (from source code)
 
 ```bash
 # Generate RSA key for JWT signing
@@ -29,6 +29,19 @@ curl -XPOST https://${CITS_DOMAIN}/token --cert ${CF_INSTANCE_CERT} --key ${CF_I
 ```
 
 Note that the token service is accessed via the Go Router, not via localhost. The router performs TLS verification and sets the validated certificate in `X-Forwarded-Client-Cert` header.
+
+## How to deploy to Cloud Foundry (with docker image)
+
+```
+# Generate RSA key for JWT signing
+./gen_rsa_keys.sh
+
+cf push cits -o ghcr.io/making/cf-identity-token-service:native --no-start
+cf set-env cits JWT_PRIVATEKEY base64:$(cat src/main/resources/private_key.pem | base64 -w0)
+cf set-env cits JWT_PUBLICKEY base64:$(cat src/main/resources/public.pem | base64 -w0)
+cf start cits
+```
+
 
 ## How to register CF Identity Token Service to AWS IAM as an OIDC Provider
 
